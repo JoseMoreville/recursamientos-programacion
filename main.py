@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -34,3 +34,11 @@ async def say_hello():
     async with aiohttp.ClientSession() as session:
         async with session.get(f'https://rickandmortyapi.com/api/character/17') as response:
             return (await response.json())
+
+
+@app.post("/api/uploadfile/")
+async def create_upload_file(file: UploadFile):
+    content = await file.read()
+    with open("uploads/imgw.png", "wb") as obj:
+        obj.write(content)
+    return {"filename": file.filename}
