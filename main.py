@@ -2,13 +2,16 @@ from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from routes import api
 from datetime import date
-import aiohttp
-import asyncio
 
 
 
 app = FastAPI()
+app.add_middleware(HTTPSRedirectMiddleware)
+app.include_router(api.router)
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -27,18 +30,3 @@ async def hora(request: Request):
                                        "currentDate": currentDate
                                         }
                                       )
-
-
-@app.get("/api/rickymorty")
-async def say_hello():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://rickandmortyapi.com/api/character/17') as response:
-            return (await response.json())
-
-
-@app.post("/api/uploadfile/")
-async def create_upload_file(file: UploadFile):
-    content = await file.read()
-    with open("uploads/imgw.png", "wb") as obj:
-        obj.write(content)
-    return {"filename": file.filename}
